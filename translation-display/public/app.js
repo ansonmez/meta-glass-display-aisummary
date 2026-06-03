@@ -370,6 +370,22 @@
     }).then(function(r) { return r.json(); }).then(console.log).catch(console.error);
   };
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
-  else init();
+  function loadConfig(callback) {
+    fetch('/api/config')
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        if (data.token) {
+          TRANSLATION_CONFIG.token = data.token;
+          CONFIG.token = data.token;
+        }
+        callback();
+      })
+      .catch(function() { callback(); });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() { loadConfig(init); });
+  } else {
+    loadConfig(init);
+  }
 })();

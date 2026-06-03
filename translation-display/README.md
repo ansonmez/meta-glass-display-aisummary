@@ -2,6 +2,10 @@
 
 A real-time translation display for Meta Display Glasses. Your iOS app posts translated text to a secure endpoint, and it appears on the glasses within 2 seconds.
 
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/ansonmez/meta-glass-display-aisummary&root=translation-display&env=TRANSLATION_TOKEN&envDescription=Your+secret+access+token.+Pick+any+string+you+like+%E2%80%94+you+will+use+it+in+your+iOS+app+and+glasses+URL.)
+
+---
+
 ## How it works
 
 ```
@@ -12,31 +16,25 @@ iOS app  →  POST /api/message  →  Vercel KV  →  browser polls every 2s  �
 
 ## Deploy to Vercel
 
-### 1. Fork this repo
+### Step 1 — Click the button above
 
-Click **Fork** on GitHub, then connect the fork to your Vercel account at [vercel.com/new](https://vercel.com/new).
+The button will:
+- Clone this repo to your own GitHub account
+- Pre-fill the root directory as `translation-display`
+- Ask you to set `TRANSLATION_TOKEN` — pick any secret string (e.g. `my-secret-token-123`)
 
-When prompted for the **Root Directory**, set it to `translation-display`.
+Click **Deploy**.
 
-### 2. Set your token
+### Step 2 — Add Vercel KV (free, required)
 
-In Vercel project settings → **Environment Variables**, add:
+After the first deploy:
 
-| Name | Value |
-|------|-------|
-| `TRANSLATION_TOKEN` | A secret string you choose, e.g. `my-secret-token-123` |
+1. Go to your Vercel project dashboard
+2. Click **Storage** → **Create Database** → **KV**
+3. Click **Connect** to link it to this project
+4. Click **Redeploy** to apply
 
-### 3. Add Vercel KV (free)
-
-In your Vercel project dashboard:
-1. Go to **Storage** → **Create Database** → **KV**
-2. Click **Connect** to link it to your project
-3. Vercel auto-injects the required environment variables — nothing else needed
-
-### 4. Deploy
-
-Trigger a deployment (push a commit or click **Redeploy** in the dashboard). Your app will be live at:
-
+Your app is now live at:
 ```
 https://your-project.vercel.app/?token=YOUR_TOKEN
 ```
@@ -45,7 +43,7 @@ https://your-project.vercel.app/?token=YOUR_TOKEN
 
 ## iOS App Setup
 
-Send translations to your Vercel deployment:
+Send translations to your deployment:
 
 ```
 POST https://your-project.vercel.app/api/message?token=YOUR_TOKEN
@@ -57,8 +55,7 @@ Content-Type: application/json
 }
 ```
 
-Or pass the token as a header instead:
-
+Or pass the token as a header:
 ```
 X-Token: YOUR_TOKEN
 ```
@@ -71,13 +68,13 @@ The `type` field is optional. Accepted values: `translation`, `summary`, `fullte
 
 ### Option A — QR code (recommended)
 
-Generate a QR code with this deep link and scan it with the Meta AI app:
+Generate a QR code from this deep link and scan it with the Meta AI app:
 
 ```
 fb-viewapp://web_app_deep_link?appName=Translation Display&appUrl=https%3A%2F%2Fyour-project.vercel.app%2F%3Ftoken%3DYOUR_TOKEN
 ```
 
-URL-encode your full app URL before inserting it into the deep link.
+Replace `your-project` and `YOUR_TOKEN` with your actual values.
 
 ### Option B — Manual
 
@@ -93,69 +90,55 @@ URL-encode your full app URL before inserting it into the deep link.
 
 - The web app requires `?token=YOUR_TOKEN` in the URL — without it, access is denied
 - All API endpoints require the token — requests without it return `403 Forbidden`
-- Token is stored as a Vercel environment variable, never in the code
+- The token is stored only as a Vercel environment variable — it is never in this repo
 
 ---
 
 ## Changing your token
 
-1. Update `TRANSLATION_TOKEN` in Vercel environment variables
-2. Redeploy
+1. Update `TRANSLATION_TOKEN` in Vercel **Project Settings → Environment Variables**
+2. Click **Redeploy**
 3. Update your iOS app and glasses URL with the new token
 
 ---
 
 ## Self-hosting with Tailscale (no Vercel)
 
-If you prefer to run everything on your own machine and expose it securely via [Tailscale](https://tailscale.com) (free), follow these steps.
+Run everything on your own machine and expose it via [Tailscale](https://tailscale.com) (free).
 
-### Prerequisites
-
-- Node.js installed
-- Tailscale installed and signed in (`tailscale status`)
-
-### 1. Install and run the server
+### 1. Clone and start
 
 ```bash
 git clone https://github.com/ansonmez/meta-glass-display-aisummary.git
 cd meta-glass-display-aisummary/translation-display
-node server-example.js
+TRANSLATION_TOKEN=your-secret node server.js
 ```
 
-The server runs on port `9090` by default. Override with `PORT=8080 node server-example.js`.
+The server runs on port `9090` by default. Override with `PORT=8080`.
 
-### 2. Expose via Tailscale Funnel (public HTTPS)
+### 2. Expose publicly via Tailscale Funnel
 
-Tailscale Funnel gives your machine a permanent public HTTPS URL. Run once — it persists across reboots:
+Run once — persists across reboots:
 
 ```bash
 sudo tailscale funnel 9090
 ```
 
-Your app will be live at:
+Your app is live at:
 ```
 https://<your-machine>.ts.net/?token=YOUR_TOKEN
 ```
 
-Check your machine's Tailscale hostname:
-```bash
-tailscale status
-```
+Find your Tailscale hostname with `tailscale status`.
+To stop: `sudo tailscale funnel --off`
 
-To stop the funnel:
-```bash
-sudo tailscale funnel --off
-```
-
-### 3. Access on your local network (no Tailscale)
-
-If you only need access from devices on the same Wi-Fi network:
+### 3. Local network only (no Tailscale)
 
 ```
 http://<your-local-ip>:9090/?token=YOUR_TOKEN
 ```
 
-Find your local IP with `ip addr show` or `ifconfig`.
+Find your IP with `ip addr show` or `ifconfig`.
 
 ### 4. iOS app endpoint (self-hosted)
 
@@ -163,8 +146,4 @@ Find your local IP with `ip addr show` or `ifconfig`.
 POST https://<your-machine>.ts.net/api/message?token=YOUR_TOKEN
 ```
 
-### Notes
-
-- The self-hosted server stores messages in memory — messages are lost on restart
-- No Vercel KV setup needed for self-hosting
-- The token is set in `config.js` — change it there and restart the server
+> **Note:** The self-hosted server stores messages in memory — messages are lost on restart. No Vercel KV needed.

@@ -3,8 +3,14 @@ const fs = require('fs');
 const path = require('path');
 
 const PORT = process.env.PORT || 9090;
-const TOKEN = process.env.TRANSLATION_TOKEN || 'app-x7k9m2p4q8r6t1y3z5tt';
+const TOKEN = process.env.TRANSLATION_TOKEN;
 const MAX_MESSAGES = 50;
+
+if (!TOKEN) {
+  console.error('ERROR: TRANSLATION_TOKEN environment variable is not set.');
+  console.error('Start the server with: TRANSLATION_TOKEN=your-secret node server.js');
+  process.exit(1);
+}
 
 const MIME_TYPES = {
   '.html': 'text/html',
@@ -14,7 +20,6 @@ const MIME_TYPES = {
   '.webmanifest': 'application/manifest+json',
 };
 
-// In-memory message store
 const messages = [];
 
 function validateToken(req) {
@@ -43,6 +48,13 @@ const server = http.createServer(async (req, res) => {
 
   const urlPath = req.url.split('?')[0];
 
+  // GET /api/config — returns token for browser
+  if (req.method === 'GET' && urlPath === '/api/config') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ token: TOKEN }));
+    return;
+  }
+
   // POST /api/message — receive from iOS app
   if (req.method === 'POST' && urlPath === '/api/message') {
     if (!validateToken(req)) {
@@ -65,7 +77,7 @@ const server = http.createServer(async (req, res) => {
       };
       messages.push(message);
       if (messages.length > MAX_MESSAGES) messages.shift();
-      console.log(`[${new Date().toISOString()}] Message received: ${body.text.substring(0, 60)}`);
+      console.log(`[${new Date().toISOString()}] Message: ${body.text.substring(0, 60)}`);
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ success: true }));
     } catch(e) {
@@ -96,9 +108,9 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  // Serve static files
+  // Serve static files from public/
   let filePath = urlPath === '/' ? '/index.html' : urlPath;
-  const fullPath = path.join(__dirname, filePath);
+  const fullPath = path.join(__dirname, 'public', filePath);
   const ext = path.extname(fullPath);
   const contentType = MIME_TYPES[ext] || 'application/octet-stream';
 
