@@ -25,12 +25,12 @@ The button will:
 
 Click **Deploy**.
 
-### Step 2 — Add Vercel KV (free, required)
+### Step 2 — Add Vercel Blob (free, required)
 
 After the first deploy:
 
 1. Go to your Vercel project dashboard
-2. Click **Storage** → **Create Database** → **KV**
+2. Click **Storage** → **Create Blob Store**
 3. Click **Connect** to link it to this project
 4. Click **Redeploy** to apply
 

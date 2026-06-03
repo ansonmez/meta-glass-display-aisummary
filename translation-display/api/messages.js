@@ -1,7 +1,17 @@
-const { kv } = require('@vercel/kv');
+const { head } = require('@vercel/blob');
 
 const TOKEN = process.env.TRANSLATION_TOKEN;
-const KV_KEY = 'messages';
+const BLOB_PATH = 'messages.json';
+
+async function readMessages() {
+  try {
+    const result = await head(BLOB_PATH);
+    const res = await fetch(result.url);
+    return await res.json();
+  } catch (e) {
+    return [];
+  }
+}
 
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -15,8 +25,8 @@ module.exports = async function handler(req, res) {
   if (!TOKEN || token !== TOKEN) return res.status(403).json({ error: 'Forbidden' });
 
   const since = parseInt(req.query.since) || 0;
-  const raw = await kv.zrangebyscore(KV_KEY, since + 1, '+inf');
-  const messages = raw.map(m => (typeof m === 'string' ? JSON.parse(m) : m));
+  const messages = await readMessages();
+  const filtered = messages.filter(m => m.timestamp > since);
 
-  return res.status(200).json({ messages });
+  return res.status(200).json({ messages: filtered });
 };
