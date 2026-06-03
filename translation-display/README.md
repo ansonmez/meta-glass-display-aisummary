@@ -2,7 +2,7 @@
 
 A real-time translation display for Meta Display Glasses. Your iOS app posts translated text to a secure endpoint, and it appears on the glasses within 2 seconds.
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/ansonmez/meta-glass-display-aisummary&root=translation-display&env=TRANSLATION_TOKEN&envDescription=Your+secret+access+token.+Pick+any+string+you+like+%E2%80%94+you+will+use+it+in+your+iOS+app+and+glasses+URL.)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/ansonmez/meta-glass-display-aisummary&root-directory=translation-display&env=TRANSLATION_TOKEN&envDescription=Your+secret+access+token.+Pick+any+string+you+like+%E2%80%94+you+will+use+it+in+your+iOS+app+and+glasses+URL.)
 
 ---
 
