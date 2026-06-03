@@ -2,9 +2,6 @@
   "name": "translation-display",
   "version": "1.0.0",
   "private": true,
-  "scripts": {
-    "build": "echo 'No build required'"
-  },
   "dependencies": {
     "@vercel/kv": "^3.0.0"
   }
